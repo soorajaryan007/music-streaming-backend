@@ -1,37 +1,101 @@
-# 🎧 Spotify Clone (Phase 1)
 
-A minimal backend prototype of a Spotify-like music service built with **Flask**, **PostgreSQL**, and **SQLAlchemy**.
+## 🎧 Music Streaming App
 
-This project is intentionally simple and designed as the **foundation for future scaling** (Redis, CDN, Load Balancer, Kafka, etc.).
+A scalable backend prototype of a **Spotify-like music streaming service** built using **Flask, PostgreSQL, and SQLAlchemy**.
+
+This project implements a backend system responsible for **user management, song metadata storage, and audio streaming**.
+It is intentionally designed as a **clean foundational architecture** that can later scale using technologies such as **Redis, CDN, Kafka, and microservices**.
+
+---
+
+# 🏗 Architecture Overview
+
+The system is designed as a modular backend service that manages music metadata and audio delivery.
+
+### Core Responsibilities
+
+* User management
+* Song metadata storage
+* Music discovery APIs
+* Audio streaming
+
+### System Flow
+
+```
+Client
+   |
+   v
+Flask REST API
+   |
+   +------ PostgreSQL (Users + Song Metadata)
+   |
+   +------ Local MP3 Storage
+```
+
+### Planned Future Architecture
+
+```
+Client
+   |
+   v
+Load Balancer
+   |
+   v
+Flask API Servers
+   |
+   +------ Redis Cache
+   |
+   +------ PostgreSQL
+   |
+   +------ Amazon S3 (Audio)
+   |
+   +------ CDN
+```
+
+This architecture mirrors the **evolution path of real streaming platforms**.
 
 ---
 
 # 🚀 Features
 
-* Flask REST API
-* PostgreSQL database
-* SQLAlchemy ORM
-* 100 dummy users (auto-seeded)
-* 10 demo songs (local MP3)
-* Basic music streaming endpoint
-* Clean, scalable project structure
+* REST API built with Flask
+* PostgreSQL relational database
+* SQLAlchemy ORM for database abstraction
+* Automatic database seeding
+* 100 dummy users for testing
+* 10 demo songs stored locally
+* Audio streaming endpoint
+* Clean modular backend structure
 
 ---
 
-# 🏗️ Current Architecture (Phase 1)
+# 🧰 Tech Stack
 
-```
-Client → Flask API → PostgreSQL
-                 → Local MP3 files
-```
+Backend Framework
+**Flask**
 
-**Not included yet (planned later):**
+Database
+**PostgreSQL**
 
-* ❌ Redis caching
-* ❌ CDN
-* ❌ Load balancer
-* ❌ Kafka
-* ❌ Microservices
+ORM
+**SQLAlchemy**
+
+Programming Language
+**Python**
+
+API Testing
+**Postman / Curl**
+
+Version Control
+**Git**
+
+Future Infrastructure (Planned)
+
+* Redis
+* AWS S3
+* CDN
+* Kafka
+* Load Balancer
 
 ---
 
@@ -40,65 +104,139 @@ Client → Flask API → PostgreSQL
 ```
 spotify_clone/
 │
-├── app.py
-├── config.py
-├── models.py
-├── seed.py
-├── requirements.txt
-└── songs/
-    └── song1.mp3 ... song10.mp3
+├── app.py              # Flask application entry point
+├── config.py           # Environment configuration
+├── models.py           # SQLAlchemy database models
+├── seed.py             # Database seeding script
+├── requirements.txt    # Python dependencies
+│
+└── songs/              # Local audio storage
+    ├── song1.mp3
+    ├── song2.mp3
+    └── song10.mp3
+```
+
+This structure keeps **application logic separated from configuration and data initialization**.
+
+---
+
+# 🔌 API Endpoints
+
+### Health Check
+
+```
+GET /
+```
+
+Response
+
+```json
+{
+  "message": "Spotify Clone Running 🎵"
+}
 ```
 
 ---
 
-# ⚙️ Prerequisites
+### Get All Songs
 
-Make sure you have installed:
+```
+GET /songs
+```
 
-* Python 3.10+
-* PostgreSQL
-* pip
-* virtualenv (recommended)
+Returns metadata for all available songs.
 
 ---
 
-# 🔧 Setup Instructions
+### Stream Song
 
-## 1️⃣ Clone or create project
+```
+GET /play/<song_id>
+```
 
-```bash
-mkdir spotify_clone
+Example
+
+```
+http://localhost:5000/play/1
+```
+
+Streams the requested MP3 file.
+
+---
+
+### Get Users (Sample)
+
+```
+GET /users
+```
+
+Returns the first 20 users from the database.
+
+---
+
+# 🗄 Database Schema
+
+### Users Table
+
+| Column     | Type                  |
+| ---------- | --------------------- |
+| id         | Integer (Primary Key) |
+| username   | String                |
+| email      | String                |
+| created_at | DateTime              |
+
+---
+
+### Songs Table
+
+| Column     | Type                  |
+| ---------- | --------------------- |
+| id         | Integer (Primary Key) |
+| title      | String                |
+| artist     | String                |
+| genre      | String                |
+| mp3_path   | String                |
+| created_at | DateTime              |
+
+---
+
+# ⚙️ Setup Instructions
+
+## 1. Clone the Repository
+
+```
+git clone https://github.com/yourusername/spotify_clone.git
 cd spotify_clone
 ```
 
 ---
 
-## 2️⃣ Create virtual environment
+## 2. Create Virtual Environment
 
-```bash
+```
 python -m venv .venv
-source .venv/bin/activate   # Linux/Mac
+source .venv/bin/activate
 ```
 
-Windows:
+Windows
 
-```bash
-.venv\\Scripts\\activate
+```
+.venv\Scripts\activate
 ```
 
 ---
 
-## 3️⃣ Install dependencies
+## 3. Install Dependencies
 
-```bash
+```
 pip install -r requirements.txt
 ```
 
 ---
 
-## 4️⃣ Create PostgreSQL database
+## 4. Create PostgreSQL Database
 
-Open psql and run:
+Open PostgreSQL and run:
 
 ```sql
 CREATE DATABASE spotify_clone;
@@ -106,15 +244,17 @@ CREATE DATABASE spotify_clone;
 
 ---
 
-## 5️⃣ Configure database (IMPORTANT)
+## 5. Configure Environment Variables
 
-Edit **config.py** if your credentials differ:
+Create a `.env` file in the project root:
 
-Make .env in root folder
-
+```
 DATABASE_URL=postgresql://user:password@localhost:5433/db_name
 S3_BUCKET=my-local-bucket
 FLASK_ENV=development
+```
+
+If needed, adjust `config.py`:
 
 ```python
 SQLALCHEMY_DATABASE_URI = "postgresql://postgres:postgres@localhost:5432/spotify_clone"
@@ -122,15 +262,15 @@ SQLALCHEMY_DATABASE_URI = "postgresql://postgres:postgres@localhost:5432/spotify
 
 ---
 
-## 6️⃣ Add MP3 files
+## 6. Add Demo Audio Files
 
 Create folder:
 
-```bash
-mkdir songs
+```
+songs/
 ```
 
-Add files:
+Add test files:
 
 ```
 song1.mp3
@@ -139,21 +279,21 @@ song2.mp3
 song10.mp3
 ```
 
-⚠️ Use small dummy audio files for testing.
+Use **small MP3 files for testing**.
 
 ---
 
-## 7️⃣ Seed the database
+## 7. Seed the Database
 
 This will create:
 
-* ✅ Tables
-* ✅ 100 dummy users
-* ✅ 10 songs
+* Database tables
+* 100 dummy users
+* 10 demo songs
 
 Run:
 
-```bash
+```
 python seed.py
 ```
 
@@ -165,9 +305,9 @@ Database seeded!
 
 ---
 
-## 8️⃣ Run the server
+## 8. Run the Server
 
-```bash
+```
 python app.py
 ```
 
@@ -179,114 +319,54 @@ http://localhost:5000
 
 ---
 
-# 🧪 API Endpoints
+# ☁ Deployment
 
-## Health Check
+The project is designed to be deployable on cloud infrastructure such as AWS.
 
-```
-GET /
-```
+Typical deployment stack:
 
-Response:
-
-```json
-{
-  "message": "Spotify Clone Running 🎵"
-}
-```
+* **AWS EC2** – application hosting
+* **PostgreSQL / RDS** – database
+* **Amazon S3** – audio storage
+* **Nginx** – reverse proxy
+* **Gunicorn** – production WSGI server
 
 ---
 
-## Get All Songs
+# 🔮 Future Improvements
 
-```
-GET /songs
-```
-
-Returns list of available songs.
-
----
-
-## Play Song
-
-```
-GET /play/<song_id>
-```
-
-Example:
-
-```
-http://localhost:5000/play/1
-```
-
-Streams the MP3 file.
-
----
-
-## Get Users (sample)
-
-```
-GET /users
-```
-
-Returns first 20 users.
-
----
-
-# 🗃️ Database Schema
-
-## Users Table
-
-| Column     | Type         |
-| ---------- | ------------ |
-| id         | Integer (PK) |
-| username   | String       |
-| email      | String       |
-| created_at | DateTime     |
-
-## Songs Table
-
-| Column     | Type         |
-| ---------- | ------------ |
-| id         | Integer (PK) |
-| title      | String       |
-| artist     | String       |
-| genre      | String       |
-| mp3_path   | String       |
-| created_at | DateTime     |
-
----
-
-# 🔮 Future Roadmap
-
-Planned upgrades toward production scale:
+Planned improvements to evolve the system toward **production-scale architecture**:
 
 * Redis caching layer
-* CDN for audio delivery
-* Load balancer
+* CDN integration for faster audio delivery
+* Load balancing for horizontal scaling
 * Kafka event streaming
 * User playlists
-* Authentication & JWT
-* Recommendation engine
-* Microservices split
+* JWT authentication
+* Music recommendation engine
+* Microservices architecture
 
 ---
 
-# 🧠 Learning Goal
+# 🎯 Learning Goals
 
-This project is meant to help understand:
+This project demonstrates:
 
-* Backend architecture basics
-* Media streaming flow
-* Database design
-* How Spotify-like systems evolve step by step
+* Backend system architecture
+* REST API design
+* Database schema modeling
+* Media streaming basics
+* Building scalable backend foundations
 
 ---
 
 # 👨‍💻 Author
 
-Sooraj Aryan
+**Sooraj Aryan**
 
 ---
 
-**Next milestone:** scaling phase with caching and performance improvements 🚀
+# 📄 License
+
+MIT License
+
