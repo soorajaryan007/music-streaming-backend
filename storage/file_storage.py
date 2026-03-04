@@ -1,7 +1,10 @@
 import os
 import uuid
+from dotenv import load_dotenv
 
-UPLOAD_FOLDER = "songs"
+load_dotenv()
+
+UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER")
 
 def save_audio_file(file):
 
