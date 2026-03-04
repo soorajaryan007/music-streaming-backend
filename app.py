@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, send_file, request
+from flask import Flask, jsonify, send_file, request, redirect
 from config import Config
 from models import db,Song
 from services.song_service import get_all_songs, get_all_users, get_song_by_title, get_song_id
@@ -35,7 +35,7 @@ def get_songs():
 @app.route("/play/<int:song_id>")
 def play_song(song_id):
     song = get_song_id(song_id)
-    return send_file(song.mp3_path, mimetype="audio/mpeg")
+    return redirect(song.mp3_path)
 
 
 # -----------------------------
@@ -66,4 +66,4 @@ def search_song():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)
