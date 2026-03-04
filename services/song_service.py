@@ -48,3 +48,20 @@ def get_song_by_title(song_name):
 def get_song_id(song_id):
     song = db.session.get(Song, song_id)
     return song
+
+
+
+
+def create_song(title, artist, genre, mp3_path):
+
+    song = Song(
+        title=title,
+        artist=artist,
+        genre=genre,
+        mp3_path=mp3_path
+    )
+
+    db.session.add(song)
+    db.session.commit()
+
+    return song

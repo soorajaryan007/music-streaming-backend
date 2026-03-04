@@ -2,8 +2,7 @@ from flask import Flask, jsonify, send_file, request,redirect
 from config import Config
 from models import db,Song
 from services.song_service import get_all_songs, get_all_users, get_song_by_title, get_song_id
-
-
+from routes.song_routes import upload_song
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -70,6 +69,11 @@ def search_song():
     return jsonify(songs)
 
 
+
+
+@app.route("/upload-song", methods=["POST"])
+def upload_song_route():
+    return upload_song()
 
 if __name__ == "__main__":
     app.run(debug=True)
