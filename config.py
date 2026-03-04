@@ -1,5 +1,8 @@
+from dotenv import load_dotenv
 import os
 
+load_dotenv()
+
 class Config:
-    SQLALCHEMY_DATABASE_URI = "postgresql://user:sooraj7972@localhost:5433/spotify_clone"
+    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL")
     SQLALCHEMY_TRACK_MODIFICATIONS = False

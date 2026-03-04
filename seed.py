@@ -2,17 +2,22 @@ import random
 from faker import Faker
 from app import app
 from models import db, User, Song
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
+
+
+S3_BASE_URL = os.getenv("S3_BASE_URL")
 fake = Faker()
 
-SONG_FILES = [
-    "songs/song1.mp3",
-    "songs/song2.mp3",
-    "songs/song3.mp3",
-    "songs/song4.mp3",
-  
-]
 
+SONG_FILES = [
+    f"{S3_BASE_URL}/song1.mp3",
+    f"{S3_BASE_URL}/song2.mp3",
+    f"{S3_BASE_URL}/song3.mp3",
+    f"{S3_BASE_URL}/song4.mp3",
+]
 
 def seed_users():
     print("Seeding users...")

@@ -110,6 +110,12 @@ CREATE DATABASE spotify_clone;
 
 Edit **config.py** if your credentials differ:
 
+Make .env in root folder
+
+DATABASE_URL=postgresql://user:password@localhost:5433/db_name
+S3_BUCKET=my-local-bucket
+FLASK_ENV=development
+
 ```python
 SQLALCHEMY_DATABASE_URI = "postgresql://postgres:postgres@localhost:5432/spotify_clone"
 ```
