@@ -1,6 +1,9 @@
 from flask import Flask, jsonify, send_file, request
 from config import Config
-from models import db, User, Song
+from models import db,Song
+from services.song_service import get_all_songs, get_all_users, get_song_by_title, get_song_id
+
+
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -21,17 +24,9 @@ def home():
 # -----------------------------
 @app.route("/songs")
 def get_songs():
-    songs = Song.query.all()
+    songs = get_all_songs()
 
-    return jsonify([
-        {
-            "id": s.id,
-            "title": s.title,
-            "artist": s.artist,
-            "genre": s.genre,
-        }
-        for s in songs
-    ])
+    return jsonify(songs)
 
 
 # -----------------------------
@@ -39,7 +34,7 @@ def get_songs():
 # -----------------------------
 @app.route("/play/<int:song_id>")
 def play_song(song_id):
-    song = Song.query.get_or_404(song_id)
+    song = get_song_id(song_id)
     return send_file(song.mp3_path, mimetype="audio/mpeg")
 
 
@@ -48,12 +43,8 @@ def play_song(song_id):
 # -----------------------------
 @app.route("/users")
 def get_users():
-    users = User.query.limit(20).all()
-
-    return jsonify([
-        {"id": u.id, "username": u.username, "email": u.email}
-        for u in users
-    ])
+    users = get_all_users()
+    return jsonify(users)
 
 # ---------------------------------
 # Search song by name
@@ -65,24 +56,12 @@ def search_song():
     if not song_name:
         return jsonify({"error": "title query parameter required"}), 400
 
-    songs = Song.query.filter(
-        Song.title.ilike(f"%{song_name}%")
-    ).all()
+    songs = get_song_by_title(song_name)
 
     if not songs:
         return jsonify({"message": "No songs found"}), 404
 
-    return jsonify([
-        {
-            "id": s.id,
-            "title": s.title,
-            "artist": s.artist,
-            "genre": s.genre,
-            "mp3_path": s.mp3_path,
-            "created_at": s.created_at,
-        }
-        for s in songs
-    ])
+    return jsonify(songs)
 
 
 
