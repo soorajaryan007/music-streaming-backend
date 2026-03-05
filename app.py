@@ -71,6 +71,7 @@ def play_song(song_id):
             return send_file(song.mp3_path, mimetype="audio/mpeg")
 
     except Exception as e:
+        print("exception 500")
         abort(500, description=str(e))
 
 
