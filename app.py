@@ -1,8 +1,10 @@
 from flask import Flask, jsonify, send_file, request,redirect,abort
+
 from config import Config
 from models import db,Song
 from services.song_service import get_all_songs, get_all_users, get_song_by_title, get_song_id
 from routes.song_routes import upload_song
+from redis_client.cache import redis_client
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -36,16 +38,38 @@ def get_songs():
 
 @app.route("/play/<int:song_id>")
 def play_song(song_id):
-    song = get_song_id(song_id)
 
-    if not song:
-        abort(404, description="Song not found")
+    cache_key = f"song:{song_id}"
 
     try:
+        # 1️⃣ Check Redis cache
+        cached_song_url = redis_client.get(cache_key)
+
+        if cached_song_url:
+            print("Cache HIT")
+
+            if Config.ENV == "production":
+                return redirect(cached_song_url)
+            else:
+                return send_file(cached_song_url, mimetype="audio/mpeg")
+
+        # 2️⃣ Cache MISS → query database
+        print("Cache MISS")
+
+        song = get_song_id(song_id)
+
+        if not song:
+            abort(404, description="Song not found")
+
+        # 3️⃣ Store in Redis
+        redis_client.set(cache_key, song.mp3_path, ex=3600)
+
+        # 4️⃣ Return response
         if Config.ENV == "production":
-            return redirect(song.mp3_path)  # S3 URL
+            return redirect(song.mp3_path)
         else:
             return send_file(song.mp3_path, mimetype="audio/mpeg")
+
     except Exception as e:
         abort(500, description=str(e))
 
