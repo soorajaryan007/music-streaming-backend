@@ -1,4 +1,6 @@
 from models import Song,User, db
+from cache import redis_cache
+from repositories.song_repository import get_song_by_id
 
 def get_all_songs():
     songs = Song.query.all()
@@ -65,3 +67,28 @@ def create_song(title, artist, genre, mp3_path):
     db.session.commit()
 
     return song
+
+
+
+
+def get_song_url(song_id):
+
+    cache_key = f"song:{song_id}"
+
+    # Check cache
+    cached_song = redis_cache.get(cache_key)
+
+    if cached_song:
+        print("Cache HIT")
+        return cached_song
+
+    print("Cache MISS")
+
+    song = get_song_by_id(song_id)
+
+    if not song:
+        return None
+
+    redis_cache.set(cache_key, song.mp3_path)
+
+    return song.mp3_path

@@ -1,10 +1,13 @@
-from flask import Flask, jsonify, send_file, request,redirect,abort
+import time
 
+from flask import Flask, jsonify, send_file, request,redirect,abort
+from services.song_service import get_song_url
+from utils.response_handler import stream_song
 from config import Config
 from models import db,Song
 from services.song_service import get_all_songs, get_all_users, get_song_by_title, get_song_id
 from routes.song_routes import upload_song
-from redis_client.cache import redis_client
+
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -34,50 +37,20 @@ def get_songs():
 # Stream song
 # -----------------------------
 
-
-import time
 @app.route("/play/<int:song_id>")
 def play_song(song_id):
 
-    start_time = time.time()   # ⏱ start timer
+    start_time = time.time()
 
-    cache_key = f"song:{song_id}"
-    cached_song_url = None
+    song_url = get_song_url(song_id)
 
-    try:
-        cached_song_url = redis_client.get(cache_key)
-    except Exception:
-        print("Redis unavailable, skipping cache")
-
-    if cached_song_url:
-        latency = time.time() - start_time
-        print(f"Cache HIT - response time: {latency:.4f} seconds")
-
-        if Config.ENV == "production":
-            return redirect(cached_song_url)
-        else:
-            return send_file(cached_song_url, mimetype="audio/mpeg")
-
-    print("Cache MISS")
-
-    song = get_song_id(song_id)
-
-    if not song:
+    if not song_url:
         abort(404, description="Song not found")
 
-    try:
-        redis_client.set(cache_key, song.mp3_path, ex=3600)
-    except Exception:
-        print("Redis unavailable, cannot cache")
-
     latency = time.time() - start_time
-    print(f"DB response time: {latency:.4f} seconds")
+    print(f"Response time: {latency:.4f} seconds")
 
-    if Config.ENV == "production":
-        return redirect(song.mp3_path)
-    else:
-        return send_file(song.mp3_path, mimetype="audio/mpeg")
-
+    return stream_song(song_url)
 
 # -----------------------------
 # Get users
