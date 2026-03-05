@@ -40,39 +40,41 @@ def get_songs():
 def play_song(song_id):
 
     cache_key = f"song:{song_id}"
+    cached_song_url = None
 
+    # 1️⃣ Try Redis
     try:
-        # 1️⃣ Check Redis cache
         cached_song_url = redis_client.get(cache_key)
+    except Exception:
+        print("Redis unavailable, skipping cache")
 
-        if cached_song_url:
-            print("Cache HIT")
+    if cached_song_url:
+        print("Cache HIT")
 
-            if Config.ENV == "production":
-                return redirect(cached_song_url)
-            else:
-                return send_file(cached_song_url, mimetype="audio/mpeg")
-
-        # 2️⃣ Cache MISS → query database
-        print("Cache MISS")
-
-        song = get_song_id(song_id)
-
-        if not song:
-            abort(404, description="Song not found")
-
-        # 3️⃣ Store in Redis
-        redis_client.set(cache_key, song.mp3_path, ex=3600)
-
-        # 4️⃣ Return response
         if Config.ENV == "production":
-            return redirect(song.mp3_path)
+            return redirect(cached_song_url)
         else:
-            return send_file(song.mp3_path, mimetype="audio/mpeg")
+            return send_file(cached_song_url, mimetype="audio/mpeg")
 
-    except Exception as e:
-        print("exception 500")
-        abort(500, description=str(e))
+    # 2️⃣ DB fallback
+    print("Cache MISS")
+
+    song = get_song_id(song_id)
+
+    if not song:
+        abort(404, description="Song not found")
+
+    # 3️⃣ Try storing in Redis (non-critical)
+    try:
+        redis_client.set(cache_key, song.mp3_path, ex=3600)
+    except Exception:
+        print("Redis unavailable, cannot cache")
+
+    # 4️⃣ Return response
+    if Config.ENV == "production":
+        return redirect(song.mp3_path)
+    else:
+        return send_file(song.mp3_path, mimetype="audio/mpeg")
 
 
 # -----------------------------
