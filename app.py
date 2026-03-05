@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, send_file, request,redirect
+from flask import Flask, jsonify, send_file, request,redirect,abort
 from config import Config
 from models import db,Song
 from services.song_service import get_all_songs, get_all_users, get_song_by_title, get_song_id
@@ -33,14 +33,21 @@ def get_songs():
 # -----------------------------
 
 
+
 @app.route("/play/<int:song_id>")
 def play_song(song_id):
     song = get_song_id(song_id)
 
-    if Config.ENV == "production":
-        return redirect(song.mp3_path)   # S3 URL
-    else:
-        return send_file(song.mp3_path, mimetype="audio/mpeg")  # Local file
+    if not song:
+        abort(404, description="Song not found")
+
+    try:
+        if Config.ENV == "production":
+            return redirect(song.mp3_path)  # S3 URL
+        else:
+            return send_file(song.mp3_path, mimetype="audio/mpeg")
+    except Exception as e:
+        abort(500, description=str(e))
 
 
 # -----------------------------
