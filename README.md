@@ -136,6 +136,27 @@ Response
 }
 ```
 
+### Search Songs
+
+```
+POST /
+```
+
+Response
+
+```json
+[
+  {
+    "artist": "Yash",
+    "created_at": "Thu, 05 Mar 2026 10:49:26 GMT",
+    "genre": "Rock",
+    "id": 10,
+    "mp3_path": "https://music-songs-list.s3.amazonaws.com/89f544e0-ca5f-4445-a42b-93af0acbe3f8.mp3",
+    "title": "Tabaahi Toxic"
+  }
+]
+```
+
 ---
 
 ### Get All Songs
@@ -216,6 +237,22 @@ cd spotify_clone
 ```
 python -m venv .venv
 source .venv/bin/activate
+```
+
+## 2. Create .env
+
+```
+DATABASE_URL=postgresql://user:sooraj7972@localhost:5433/spotify_clone
+S3_BASE_URL = "songs"
+FLASK_ENV=development
+ENV=local
+UPLOAD_FOLDER="songs"
+
+STORAGE_TYPE=local
+S3_BUCKET=my-music-bucket
+AWS_REGION=ap-south-1
+AWS_ACCESS_KEY=xxxx
+AWS_SECRET_KEY=xxxx
 ```
 
 Windows
@@ -318,6 +355,8 @@ http://localhost:5000
 ```
 
 ---
+
+
 
 # ☁ Deployment
 
