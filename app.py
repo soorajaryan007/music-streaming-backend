@@ -35,28 +35,29 @@ def get_songs():
 # -----------------------------
 
 
-
+import time
 @app.route("/play/<int:song_id>")
 def play_song(song_id):
+
+    start_time = time.time()   # ⏱ start timer
 
     cache_key = f"song:{song_id}"
     cached_song_url = None
 
-    # 1️⃣ Try Redis
     try:
         cached_song_url = redis_client.get(cache_key)
     except Exception:
         print("Redis unavailable, skipping cache")
 
     if cached_song_url:
-        print("Cache HIT")
+        latency = time.time() - start_time
+        print(f"Cache HIT - response time: {latency:.4f} seconds")
 
         if Config.ENV == "production":
             return redirect(cached_song_url)
         else:
             return send_file(cached_song_url, mimetype="audio/mpeg")
 
-    # 2️⃣ DB fallback
     print("Cache MISS")
 
     song = get_song_id(song_id)
@@ -64,13 +65,14 @@ def play_song(song_id):
     if not song:
         abort(404, description="Song not found")
 
-    # 3️⃣ Try storing in Redis (non-critical)
     try:
         redis_client.set(cache_key, song.mp3_path, ex=3600)
     except Exception:
         print("Redis unavailable, cannot cache")
 
-    # 4️⃣ Return response
+    latency = time.time() - start_time
+    print(f"DB response time: {latency:.4f} seconds")
+
     if Config.ENV == "production":
         return redirect(song.mp3_path)
     else:
@@ -101,7 +103,6 @@ def search_song():
         return jsonify({"message": "No songs found"}), 404
 
     return jsonify(songs)
-
 
 
 
