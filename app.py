@@ -7,7 +7,7 @@ from config import Config
 from models import db,Song
 from services.song_service import get_all_songs, get_all_users, get_song_by_title, get_song_id
 from routes.song_routes import upload_song
-
+from api_latency.latency import measure_latency
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -38,18 +38,11 @@ def get_songs():
 # -----------------------------
 
 @app.route("/play/<int:song_id>")
+@measure_latency
 def play_song(song_id):
-
-    start_time = time.time()
-
     song_url = get_song_url(song_id)
-
     if not song_url:
-        abort(404, description="Song not found")
-
-    latency = time.time() - start_time
-    print(f"Response time: {latency:.4f} seconds")
-
+        abort(404)
     return stream_song(song_url)
 
 # -----------------------------

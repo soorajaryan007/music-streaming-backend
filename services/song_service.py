@@ -52,8 +52,6 @@ def get_song_id(song_id):
     return song
 
 
-
-
 def create_song(title, artist, genre, mp3_path):
 
     song = Song(
@@ -67,8 +65,6 @@ def create_song(title, artist, genre, mp3_path):
     db.session.commit()
 
     return song
-
-
 
 
 def get_song_url(song_id):
