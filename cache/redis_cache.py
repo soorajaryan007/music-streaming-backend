@@ -1,20 +1,18 @@
 import redis
 from config import Config
 
-'''
+
 redis_client = redis.Redis(
     host=Config.REDIS_HOST,
     port=Config.REDIS_PORT,
     decode_responses=True
 )
-
 '''
-
 redis_client = redis.Redis(
     host="localhost",
     port=6379,
     decode_responses=True
-)
+)'''
 
 def get(key):
     try:

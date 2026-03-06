@@ -22,34 +22,31 @@ The system is designed as a modular backend service that manages music metadata 
 ### System Flow
 
 ```
-Client
-   |
-   v
-Flask REST API
-   |
-   +------ PostgreSQL (Users + Song Metadata)
-   |
-   +------ Local MP3 Storage
+Users
+   ↓
+Application Load Balancer
+   ↓
+EC2 Instance 1 (Gunicorn Flask)
+EC2 Instance 2 (Gunicorn Flask)
+   ↓
+Redis (ElasticCache)
+   ↓
+PostgreSQL / Database
 ```
 
 ### Planned Future Architecture
 
 ```
-Client
-   |
-   v
-Load Balancer
-   |
-   v
-Flask API Servers
-   |
-   +------ Redis Cache
-   |
-   +------ PostgreSQL
-   |
-   +------ Amazon S3 (Audio)
-   |
-   +------ CDN
+Users
+   ↓
+Application Load Balancer
+   ↓
+EC2 Instance 1 (Gunicorn Flask)
+EC2 Instance 2 (Gunicorn Flask)
+   ↓
+Redis (ElasticCache)
+   ↓
+PostgreSQL / Database
 ```
 
 This architecture mirrors the **evolution path of real streaming platforms**.
