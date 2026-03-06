@@ -1,5 +1,6 @@
 import time
 
+from flask_cors import CORS
 from flask import Flask, jsonify, send_file, request,redirect,abort
 from services.song_service import get_song_url
 from utils.response_handler import stream_song
@@ -10,6 +11,7 @@ from routes.song_routes import upload_song
 from api_latency.latency import measure_latency
 
 app = Flask(__name__)
+CORS(app)
 app.config.from_object(Config)
 
 db.init_app(app)
