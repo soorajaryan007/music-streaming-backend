@@ -1,24 +1,47 @@
-from flask import request, jsonify
-from services.song_service import create_song
-from storage.storage_factory import save_audio_file
+from flask import Blueprint, jsonify, request, abort
+from services.song_service import (
+    get_all_songs,
+    get_song_url,
+    get_song_by_title
+)
+from utils.response_handler import stream_song
+from api_latency.latency import measure_latency
+from services.song_upload import upload_song
 
-def upload_song():
+song_bp = Blueprint("songs", __name__)
 
-    file = request.files.get("file")
-    title = request.form.get("title")
-    artist = request.form.get("artist")
-    genre = request.form.get("genre")
 
-    if not file:
-        return {"error": "No file uploaded"}, 400
+@song_bp.route("/songs")
+def get_songs():
+    songs = get_all_songs()
+    return jsonify(songs)
 
-    file_path = save_audio_file(file)
 
-    song = create_song(title, artist, genre, file_path)
+@song_bp.route("/play/<int:song_id>")
+@measure_latency
+def play_song(song_id):
+    song_url = get_song_url(song_id)
 
-    return jsonify({
-        "id": song.id,
-        "title": song.title,
-        "artist": song.artist,
-        "genre": song.genre
-    })
+    if not song_url:
+        abort(404)
+
+    return stream_song(song_url)
+
+
+@song_bp.route("/songs/search")
+def search_song():
+    song_name = request.args.get("title")
+
+    if not song_name:
+        return {"error": "title query parameter required"}, 400
+
+    songs = get_song_by_title(song_name)
+
+    if not songs:
+        return {"message": "No songs found"}, 404
+
+    return jsonify(songs)
+
+@song_bp.route("/upload-song", methods=["POST"])
+def upload_song_route():
+    return upload_song()

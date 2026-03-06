@@ -1,82 +1,30 @@
-import time
-
+from flask import Flask
 from flask_cors import CORS
-from flask import Flask, jsonify, send_file, request,redirect,abort
-from services.song_service import get_song_url
-from utils.response_handler import stream_song
 from config import Config
-from models import db,Song
-from services.song_service import get_all_songs, get_all_users, get_song_by_title, get_song_id
-from routes.song_routes import upload_song
-from api_latency.latency import measure_latency
+from models import db
 
-app = Flask(__name__)
-CORS(app)
-app.config.from_object(Config)
+from routes.song_routes import song_bp
+from routes.user_routes import user_bp
+from routes.health_routes import health_bp
 
-db.init_app(app)
+def create_app():
+    app = Flask(__name__)
 
+    app.config.from_object(Config)
 
-# -----------------------------
-# Health Check
-# -----------------------------
-@app.route("/")
-def home():
-    return {"message": "Spotify Clone Running 🎵"}
+    CORS(app)
 
+    db.init_app(app)
 
-# -----------------------------
-# Get all songs
-# -----------------------------
-@app.route("/songs")
-def get_songs():
-    songs = get_all_songs()
+    # Register blueprints
+    app.register_blueprint(song_bp)
+    app.register_blueprint(user_bp)
+    app.register_blueprint(health_bp)
 
-    return jsonify(songs)
+    return app
 
 
-# -----------------------------
-# Stream song
-# -----------------------------
-
-@app.route("/play/<int:song_id>")
-@measure_latency
-def play_song(song_id):
-    song_url = get_song_url(song_id)
-    if not song_url:
-        abort(404)
-    return stream_song(song_url)
-
-# -----------------------------
-# Get users
-# -----------------------------
-@app.route("/users")
-def get_users():
-    users = get_all_users()
-    return jsonify(users)
-
-# ---------------------------------
-# Search song by name
-# ---------------------------------
-@app.route("/songs/search")
-def search_song():
-    song_name = request.args.get("title")
-
-    if not song_name:
-        return jsonify({"error": "title query parameter required"}), 400
-
-    songs = get_song_by_title(song_name)
-
-    if not songs:
-        return jsonify({"message": "No songs found"}), 404
-
-    return jsonify(songs)
-
-
-
-@app.route("/upload-song", methods=["POST"])
-def upload_song_route():
-    return upload_song()
+app = create_app()
 
 if __name__ == "__main__":
     app.run(debug=True)
