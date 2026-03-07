@@ -1,3 +1,5 @@
+import os
+
 from flask import Flask
 from flask_cors import CORS
 from config import Config
@@ -26,5 +28,12 @@ def create_app():
 
 app = create_app()
 
+
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    host = os.getenv("HOST", "127.0.0.1")
+    port = int(os.getenv("PORT", 5000))
+
+    app.run(host=host, port=port, debug=True)
+
+    
