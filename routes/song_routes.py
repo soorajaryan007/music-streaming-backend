@@ -1,14 +1,18 @@
 from flask import Blueprint, jsonify, request, abort
 
-from utils.response_handler import stream_song
+from utils.response_handler import StreamingService
 from api_latency.latency import measure_latency
-from services.song_upload import upload_song
-
+from services.song_upload import SongController
 
 from services.song_service import SongService
 
-
 song_bp = Blueprint("songs", __name__)
+
+u = SongController()
+upload_song =u.upload_song
+
+st = StreamingService()
+stream_song = st.stream_song
 
 s = SongService()
 get_all_songs = s.get_all_songs

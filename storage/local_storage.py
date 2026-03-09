@@ -1,23 +1,21 @@
 import os
 import uuid
-from dotenv import load_dotenv
-
-load_dotenv()
-
-UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER", "uploads")
+from config import Config
 
 
-def save_audio_file(file):
+class LocalStorage:
 
-    filename = str(uuid.uuid4()) + ".mp3"
+    def __init__(self):
+        self.upload_folder = Config.UPLOAD_FOLDER
+        os.makedirs(self.upload_folder, exist_ok=True)
 
-    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+    def save_audio_file(self, file):
 
-    file_path = os.path.join(UPLOAD_FOLDER, filename)
+        filename = f"{uuid.uuid4()}.mp3"
 
-    file.save(file_path)
+        file_path = os.path.join(self.upload_folder, filename)
 
-    return file_path
+        file.save(file_path)
 
-
+        return file_path
     
