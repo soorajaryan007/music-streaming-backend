@@ -1,90 +1,92 @@
 from models import Song,User, db
-from cache import redis_cache
-from repositories.song_repository import get_song_by_id
-
-def get_all_songs():
-    songs = Song.query.all()
-
-    return [
-        {
-            "id": s.id,
-            "title": s.title,
-            "artist": s.artist,
-            "genre": s.genre,
-        }
-        for s in songs
-    ]
+from cache.redis_cache import RedisCache
+from repositories.song_repository import SongRepository
 
 
-def get_all_users():
-    users = User.query.limit(20).all()
 
-    return ([
-        {"id": u.id, "username": u.username, "email": u.email}
-        for u in users
-    ])
+class SongService:
 
+    def __init__(self):
+        self.song_repo = SongRepository()
+        self.redis_cache = RedisCache()
 
-def get_song_by_title(song_name):
+    def get_all_songs(self):
+        songs = Song.query.all()
 
-    songs = Song.query.filter(
-        Song.title.ilike(f"%{song_name}%")
-    ).all()
+        return [
+            {
+                "id": s.id,
+                "title": s.title,
+                "artist": s.artist,
+                "genre": s.genre,
+            }
+            for s in songs
+        ]
 
-    if not songs:
-        return None
+    def get_all_users(self):
+        users = User.query.limit(20).all()
 
-    return ([
-        {
-            "id": s.id,
-            "title": s.title,
-            "artist": s.artist,
-            "genre": s.genre,
-            "mp3_path": s.mp3_path,
-            "created_at": s.created_at,
-        }
-        for s in songs
-    ])
+        return [
+            {"id": u.id, "username": u.username, "email": u.email}
+            for u in users
+        ]
 
+    def get_song_by_title(self, song_name):
 
-def get_song_id(song_id):
-    song = db.session.get(Song, song_id)
-    return song
+        songs = Song.query.filter(
+            Song.title.ilike(f"%{song_name}%")
+        ).all()
 
+        if not songs:
+            return None
 
-def create_song(title, artist, genre, mp3_path):
+        return [
+            {
+                "id": s.id,
+                "title": s.title,
+                "artist": s.artist,
+                "genre": s.genre,
+                "mp3_path": s.mp3_path,
+                "created_at": s.created_at,
+            }
+            for s in songs
+        ]
 
-    song = Song(
-        title=title,
-        artist=artist,
-        genre=genre,
-        mp3_path=mp3_path
-    )
+    def get_song_id(self, song_id):
+        song = db.session.get(Song, song_id)
+        return song
 
-    db.session.add(song)
-    db.session.commit()
+    def create_song(self, title, artist, genre, mp3_path):
 
-    return song
+        song = Song(
+            title=title,
+            artist=artist,
+            genre=genre,
+            mp3_path=mp3_path
+        )
 
+        db.session.add(song)
+        db.session.commit()
 
-def get_song_url(song_id):
+        return song
 
-    cache_key = f"song:{song_id}"
+    def get_song_url(self, song_id):
 
-    # Check cache
-    cached_song = redis_cache.get(cache_key)
+        cache_key = f"song:{song_id}"
 
-    if cached_song:
-        print("Cache HIT")
-        return cached_song
+        cached_song = self.redis_cache.get(cache_key)
 
-    print("Cache MISS")
+        if cached_song:
+            print("Cache HIT")
+            return cached_song
 
-    song = get_song_by_id(song_id)
+        print("Cache MISS")
 
-    if not song:
-        return None
+        song = self.song_repo.get_song_by_id(song_id)
 
-    redis_cache.set(cache_key, song.mp3_path)
+        if not song:
+            return None
 
-    return song.mp3_path
+        self.redis_cache.set(cache_key, song.mp3_path)
+
+        return song.mp3_path

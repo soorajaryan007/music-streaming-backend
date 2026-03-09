@@ -1,7 +1,8 @@
 from flask import request, jsonify
-from services.song_service import create_song
+from services.song_service import SongService
 from storage.storage_factory import save_audio_file
-
+s = SongService()
+creat_song = s.create_song
 def upload_song():
 
     file = request.files.get("file")

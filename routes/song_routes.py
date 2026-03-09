@@ -1,15 +1,19 @@
 from flask import Blueprint, jsonify, request, abort
-from services.song_service import (
-    get_all_songs,
-    get_song_url,
-    get_song_by_title
-)
+
 from utils.response_handler import stream_song
 from api_latency.latency import measure_latency
 from services.song_upload import upload_song
 
+
+from services.song_service import SongService
+
+
 song_bp = Blueprint("songs", __name__)
 
+s = SongService()
+get_all_songs = s.get_all_songs
+get_song_url = s.get_song_url
+get_song_by_title = s.get_song_by_title
 
 @song_bp.route("/songs")
 def get_songs():
