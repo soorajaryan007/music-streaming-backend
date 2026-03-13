@@ -98,19 +98,49 @@ Future Infrastructure (Planned)
 
 # 📁 Project Structure
 
+## 📁 Project Structure
+
 ```
 spotify_clone/
 │
-├── app.py              # Flask application entry point
-├── config.py           # Environment configuration
-├── models.py           # SQLAlchemy database models
-├── seed.py             # Database seeding script
-├── requirements.txt    # Python dependencies
+├── app.py                  # Flask application entry point
+├── config.py               # Configuration settings
+├── models.py               # Database models
+├── seed.py                 # Script to seed sample data
+├── requirements.txt        # Python dependencies
 │
-└── songs/              # Local audio storage
-    ├── song1.mp3
-    ├── song2.mp3
-    └── song10.mp3
+├── api_latency/            # API latency measurement utilities
+│   └── latency.py
+│
+├── cache/                  # Caching layer
+│   └── redis_cache.py
+│
+├── repositories/           # Data access layer
+│   └── song_repository.py
+│
+├── routes/                 # API routes / controllers
+│   ├── health_routes.py
+│   ├── song_routes.py
+│   └── user_routes.py
+│
+├── services/               # Business logic layer
+│   ├── song_service.py
+│   └── song_upload.py
+│
+├── storage/                # Storage abstraction layer
+│   ├── local_storage.py
+│   ├── s3_storage.py
+│   └── storage_factory.py
+│
+├── utils/                  # Utility helpers
+│   └── response_handler.py
+│
+├── songs/                  # Stored audio files
+│   └── *.mp3
+│
+└── test/                   # Load testing
+    ├── load_test.py
+    └── locustfile.py
 ```
 
 This structure keeps **application logic separated from configuration and data initialization**.
